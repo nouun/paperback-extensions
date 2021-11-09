@@ -673,13 +673,13 @@ exports.parseChapterDetails = parseChapterDetails;
 const parseChapters = ($, mangaId) => $(".chapters > li")
     .toArray()
     .map((el) => {
-    const titleEl = $("h5 > a", el);
-    const idParts = titleEl.attr("href").split("/");
+    const linkEl = $("h5 > a", el);
+    const idParts = linkEl.attr("href").split("/");
     const id = idParts[idParts.length - 1];
-    const name = titleEl.text();
     const volume = $(el).attr("class")
         .split("-")[1];
     const chapNum = Number(id) || 0;
+    const name = $("h5 > em", el).text() || `Chapter ${chapNum}`;
     const dateStr = $("div > div", el).text();
     const time = new Date(Date.parse(dateStr)) || new Date();
     return createChapter({
