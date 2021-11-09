@@ -1,0 +1,42 @@
+{
+  "name": "extensions-nouun",
+  "version": "0.1.0",
+  "description": "Nouun's Paperback extension repository",
+  "main": "index.js",
+  "scripts": {
+    "bundle": "paperback bundle",
+    "serve": "paperback serve",
+    "test": "ts-mocha -p tsconfig.json src/**/*.spec.ts",
+    "lint": "eslint_d src/**/*.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nouun/paperback.git"
+  },
+  "author": "nouun",
+  "license": "GPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/nouun/paperback/issues"
+  },
+  "homepage": "https://github.com/nouun/paperback#readme",
+  "typeRoots": ["./node_modules/@types", "./typings"],
+  "devDependencies": {
+    "@types/chai": "^4.2.22",
+    "@types/chai-as-promised": "^7.1.4",
+    "@types/expect": "^24.3.0",
+    "@types/mocha": "^9.0.0",
+    "@typescript-eslint/eslint-plugin": "^4.25.0",
+    "@typescript-eslint/parser": "^4.25.0",
+    "chai": "^4.3.4",
+    "chai-as-promised": "^7.1.1",
+    "eslint": "^7.27.0",
+    "eslint-plugin-modules-newline": "^0.0.6",
+    "mocha": "^8.4.0",
+    "ts-mocha": "^8.0.0",
+    "typescript": "^4.3.2"
+  },
+  "dependencies": {
+    "paperback-cli": "^1.4.0",
+    "paperback-extensions-common": "^4.2.0"
+  }
+}
