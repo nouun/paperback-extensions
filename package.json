@@ -7,7 +7,8 @@
     "bundle": "paperback bundle",
     "serve": "paperback serve",
     "test": "ts-mocha -p tsconfig.json src/**/*.spec.ts",
-    "lint": "eslint_d src/**/*.ts"
+    "lint": "eslint_d src/**/*.ts",
+    "fix": "eslint_d src/**/*.ts --fix"
   },
   "repository": {
     "type": "git",
