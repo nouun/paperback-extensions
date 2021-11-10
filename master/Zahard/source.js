@@ -700,11 +700,16 @@ const parseUpdatedItems = ($, truncate) => $(".hot-thumbnails > li > div").toArr
     const title = createIconText({ text: titleEl.text() });
     const idParts = titleEl.attr("href").split("/");
     const id = idParts[idParts.length - 1];
+    const chapter = $(".well", el).text()
+        .trim()
+        .substr(1);
+    const chapterText = createIconText({ text: "Ch. " + chapter });
     const image = $("a > img", el).attr("src");
     return createMangaTile({
         title,
         id,
         image,
+        subtitleText: chapterText,
     });
 })
     .filter((_, index) => (!truncate || (index < 12)));
@@ -722,7 +727,7 @@ const parseFilterSearch = ($) => $(".col-sm-6 > .media")
         id,
         title,
         image,
-        subtitleText: createIconText({ text: rating.toFixed(2) }),
+        subtitleText: createIconText({ text: "☆ " + rating.toFixed(2) }),
     });
 });
 exports.parseFilterSearch = parseFilterSearch;
