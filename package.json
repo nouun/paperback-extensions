@@ -8,9 +8,10 @@
   "scripts": {
     "bundle": "paperback bundle",
     "serve": "paperback serve",
-    "test": "ts-mocha -p tsconfig.json src/**/*.spec.ts",
-    "lint": "eslint_d src/**/*.ts",
-    "fix": "eslint_d src/**/*.ts --fix"
+    "test": "ts-mocha -p ./tsconfig.json ./src/**/*.spec.ts",
+    "lint": "eslint_d ./src/**/*.ts",
+    "fix": "eslint_d ./src/**/*.ts --fix",
+    "watch": "find './src/' -type f | entr -r sh -c 'rm -rf ./bundles/ && npm run serve'"
   },
   "repository": {
     "type": "git",

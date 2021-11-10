@@ -5,6 +5,8 @@ stdenv.mkDerivation {
 
   buildInputs = with pkgs; [
     nodejs-16_x
+
+    entr
   ] ++ (with pkgs.nodePackages; [
     npm
   ]);
