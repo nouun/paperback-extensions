@@ -492,6 +492,7 @@ class ComicK extends paperback_extensions_common_1.Source {
     }
     getHomePageSections(cb) {
         return __awaiter(this, void 0, void 0, function* () {
+            console.log("Getting sections");
             const sections = [
                 createHomeSection({
                     id: "uploaded",
@@ -519,7 +520,9 @@ class ComicK extends paperback_extensions_common_1.Source {
                 promises.push(this.requestManager
                     .schedule(req, 2)
                     .then((data) => {
+                    console.log("Gotting a section");
                     section.items = (0, ComicKFunParser_1.parseSearchItems)(data.data);
+                    console.log("Done got a section");
                     cb(section);
                 }));
             }
