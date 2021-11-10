@@ -1,5 +1,7 @@
 {
   "name": "extensions-nouun",
+  "repositoryName": "Nouun's Extensions",
+  "baseUrl": "https://github.com/nouun/",
   "version": "0.1.0",
   "description": "Nouun's Paperback extension repository",
   "main": "index.js",
