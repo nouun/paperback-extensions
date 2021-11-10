@@ -132,6 +132,10 @@ export const parseUpdatedItems =
         const title = createIconText({ text: titleEl.text() });
         const idParts = titleEl.attr("href").split("/");
         const id = idParts[idParts.length - 1];
+        const chapter = $(".well", el).text()
+          .trim()
+          .substr(1);
+        const chapterText = createIconText({ text: "Ch. " + chapter });
 
         const image = $("a > img", el).attr("src");
 
@@ -139,6 +143,7 @@ export const parseUpdatedItems =
           title,
           id,
           image,
+          subtitleText: chapterText,
         });
       })
       .filter((_: MangaTile, index: number) => (!truncate || (index < 12)));
@@ -159,7 +164,7 @@ export const parseFilterSearch =
           id,
           title,
           image,
-          subtitleText: createIconText({ text: rating.toFixed(2) }),
+          subtitleText: createIconText({ text: "☆ " + rating.toFixed(2) }),
         });
       });
 
