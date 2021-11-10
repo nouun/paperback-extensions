@@ -416,7 +416,7 @@ class ComicK extends paperback_extensions_common_1.Source {
     getSearchResults(query, metadata) {
         return __awaiter(this, void 0, void 0, function* () {
             const page = (metadata === null || metadata === void 0 ? void 0 : metadata.page) || 0;
-            console.log(metadata);
+            //console.log(metadata);
             const title = (query.title || "").toString();
             const q = encodeURIComponent(title);
             const req = createRequestObject({
