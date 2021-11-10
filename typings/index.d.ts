@@ -1,3 +1,4 @@
 type Metadata = {
-  page: number | undefined
-} | undefined;
+  page?: number,
+  end?: boolean
+}
