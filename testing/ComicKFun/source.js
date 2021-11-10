@@ -660,8 +660,8 @@ const parseChapters = (mangaId, data) => JSON.parse(data)
             break;
     }
     const id = c.hid;
-    const name = c.title || undefined;
-    const volume = parseInt(c.vol || "") || undefined;
+    const name = c.title || "Unknown";
+    const volume = parseInt(c.vol || "") || 1;
     const chapNum = parseInt(c.chap || "0") || 0;
     const time = new Date(c.created_at);
     return createChapter({
