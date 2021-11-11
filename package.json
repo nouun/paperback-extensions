@@ -15,14 +15,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/nouun/paperback.git"
+    "url": "git+https://github.com/nouun/paperback-extensions.git"
   },
   "author": "nouun",
   "license": "GPL-3.0-or-later",
   "bugs": {
-    "url": "https://github.com/nouun/paperback/issues"
+    "url": "https://github.com/nouun/paperback-extensions/issues"
   },
-  "homepage": "https://github.com/nouun/paperback#readme",
+  "homepage": "https://nouun.github.io/paperback-extensions",
   "typeRoots": ["./node_modules/@types", "./typings"],
   "devDependencies": {
     "@types/chai": "^4.2.22",
