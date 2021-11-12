@@ -3,26 +3,34 @@ import {
   ChapterDetails,
   ContentRating,
   HomeSection,
+  HomeSectionType,
   LanguageCode,
   Manga,
   MangaTile,
   PagedResults,
+  Request,
+  RequestInterceptor,
+  RequestManager,
+  Response,
   SearchRequest,
   Section,
   Source,
   SourceInfo,
+  Tag,
+  TagSection,
 } from "paperback-extensions-common";
 import {
   getStateData,
   menuGeneralSettings,
 } from "./NewTokiSettings";
-import { URLBuilder } from "./GeneralHelper";
 import {
   parseChapterDetails,
   parseChapters,
   parseMangaDetails,
   parseSearchResults,
+  parseSearchTags,
 } from "./NewTokiParser";
+import { URLBuilder } from "./GeneralHelper";
 
 export const DEFAULT_NEWTOKI_URL = "https://newtoki111.com";
 
@@ -34,7 +42,7 @@ export const NewTokiInfo: SourceInfo = {
   description: "Extension that scrapes webtoons from 뉴토끼.",
   author: "Nouun",
   authorWebsite: "https://github.com/nouun/",
-  contentRating: ContentRating.MATURE,
+  contentRating: ContentRating.ADULT,
   language: LanguageCode.KOREAN,
 };
 
@@ -43,7 +51,8 @@ export class NewToki extends Source {
 
   requestManager = createRequestManager({
     requestsPerSecond: 4,
-    requestTimeout: 15000,
+    requestTimeout: 10000,
+    interceptor: new NewTokiInterceptor(() => this.requestManager),
   });
 
   stateManager = createSourceStateManager({});
@@ -70,15 +79,41 @@ export class NewToki extends Source {
 
   // eslint-disable-next-line max-len
   async getSearchResults(query: SearchRequest, metadata?: Metadata): Promise<PagedResults> {
+    const page = metadata?.page || 1;
     const title = query.title || "";
-    if (title.split("").length < 2 || metadata?.end) {
+    if (metadata?.end) {
       return createPagedResults({ results: [] });
     }
 
+    const url = (await this.getBaseURL())
+      .addPath("webtoon")
+      .addParam("stx", title)
+      .addParam("tag", query.includedTags?.map((tag) => tag.id).join(","));
+
+    if (page > 1) url.addPath(`p${page}`);
+    const req = createRequestObject({
+      url: url.build(),
+      method: "GET",
+    });
+
+    const data = await this.requestManager.schedule(req, 2);
+    const cheerio = this.cheerio.load(data.data);
+
+    const [ results, end ] = parseSearchResults(cheerio, this.NEWTOKI_URL);
+
+    return createPagedResults({
+      results,
+      metadata: {
+        page: page + (end ? 0 : 1),
+        end,
+      },
+    });
+  }
+
+  override async getSearchTags(): Promise<TagSection[]> {
     const req = createRequestObject({
       url: (await this.getBaseURL())
         .addPath("webtoon")
-        .addParam("stx", title)
         .build(),
       method: "GET",
     });
@@ -86,26 +121,7 @@ export class NewToki extends Source {
     const data = await this.requestManager.schedule(req, 2);
     const cheerio = this.cheerio.load(data.data);
 
-    const results = parseSearchResults(cheerio);
-
-    return createPagedResults({
-      results,
-      metadata: { end: true },
-    });
-  }
-
-  async getSearchTagResults(tag: Tag, metadata: Metadata): Promise<PagedResults> {
-    const page = metadata?.page || 1;
-    const req = createRequestObject({
-      url: `${BASE_URL}/filterList?page=${page}&cat=${tag.id}&sortBy=name&asc=true`,
-      method: "GET",
-    });
-
-    const data = await this.requestManager.schedule(req, 2);
-    const cheerio = this.cheerio.load(data.data);
-    const results = parseFilterSearch(cheerio);
-
-    return createPagedResults({ results });
+    return parseSearchTags(cheerio);
   }
 
   async getMangaDetails(mangaId: string): Promise<Manga> {
@@ -152,68 +168,142 @@ export class NewToki extends Source {
     return parseChapterDetails(data.data, this.cheerio, mangaId, id);
   }
 
-  // override async getSearchTags(): Promise<TagSection[]> {
-  //   const req = createRequestObject({
-  //     url: `${BASE_URL}/manga-list`,
-  //     method: "GET",
-  //   });
+  override async getHomePageSections(cb: (section: HomeSection) => void): Promise<void> {
+    const sorts = [
+      {
+        id: "as_view",
+        name: "인기순",
+      },
+      {
+        id: "as_good",
+        name: "추천순",
+      },
+      {
+        id: "as_star",
+        name: "별점순",
+      },
+      {
+        id: "new",
+        name: "최신",
+      },
+    ];
+    const toonTypes = [ "일반웹툰", "성인웹툰", "BL/GL" ];
 
-  //   const data = await this.requestManager.schedule(req, 2);
-  //   const cheerio = this.cheerio.load(data.data);
+    const stateData = await getStateData(this.stateManager);
+    const sections = toonTypes
+      .filter((toonType) => stateData.homeSections.includes(toonType))
+      .flatMap((toonType) => sorts
+        // eslint-disable-next-line
+        .map((sort) => { return { sort, toonType }; }))
+      .map(({ sort: { id, name }, toonType }, idx) => createHomeSection({
+        id: `${toonType}-${id}`,
+        type: idx == 0 ?
+          HomeSectionType.featured :
+          HomeSectionType.singleRowNormal,
+        title: `${toonType}: ${name}`,
+        view_more: true,
+      }));
 
-  //   return parseSearchTags(cheerio);
-  // }
+    const promises = sections.map(async (section) => {
+      const [ toonType, id ] = section.id.split("-");
 
-  //     override async getHomePageSections(cb: (section: HomeSection) => void): Promise<void> {
-  //       const req = createRequestObject({
-  //         url: `${API_BASE_URL}?${PARAMS}`,
-  //         method: "GET",
-  //       });
-  //       const data = await this.requestManager.schedule(req, 2);
-  //       const details = JSON.parse(data.data).data;
+      cb(section);
 
-  //       parseHomePageSections(details, cb);
-  //     }
+      const url = (await this.getBaseURL())
+        .addPath("webtoon")
+        .addParam("toon", toonType)
+        .addParam("sod", "desc");
 
-  //     override async getViewMoreItems(id: string, metadata: Metadata): Promise<PagedResults> {
-  //       const page = metadata?.page || 1;
-  //       let results: MangaTile[];
-  //       switch (id) {
-  //         case "updated": {
-  //           if (page != 1)
-  //             return createPagedResults({ results: [] });
+      if (id != "new") {
+        url.addParam("sst", id);
+      }
 
-  //           const req = createRequestObject({
-  //             url: BASE_URL,
-  //             method: "GET",
-  //           });
+      const req = createRequestObject({
+        url: url.build(),
+        method: "GET",
+      });
 
-  //           const data = await this.requestManager.schedule(req, 2);
-  //           const $ = this.cheerio.load(data.data);
+      const data = await this.requestManager.schedule(req, 2);
+      const cheerio = this.cheerio.load(data.data);
 
-  //           results = parseUpdatedItems($, false);
-  //           break;
-  //         }
-  //         case "viewed": {
-  //           const req = createRequestObject({
-  //             url: `${BASE_URL}/filterList?page=${page}&sortBy=views&asc=false`,
-  //             method: "GET",
-  //           });
+      const [ results ] = parseSearchResults(cheerio, this.NEWTOKI_URL);
 
-  //           const data = await this.requestManager.schedule(req, 2);
-  //           const $ = this.cheerio.load(data.data);
+      // if (section.type == HomeSectionType.featured) {
+      //   result = result.map((res) => {
+      //     res.subtitleText = undefined;
+      //     return res;
+      //   });
+      // }
 
-  //           results = parseFilterSearch($);
-  //           break;
-  //         }
-  //         default:
-  //           return Promise.resolve(createPagedResults({ results: [] }));
-  //       }
+      section.items = results;
+      cb(section);
+    });
 
-//     return createPagedResults({
-//       results,
-//       metadata: { page: page + 1 },
-//     });
-//   }
+    Promise.all(promises);
+  }
+
+  override async getViewMoreItems(ID: string, metadata: Metadata): Promise<PagedResults> {
+    if (metadata?.end) {
+      return createPagedResults({
+        results: [],
+        metadata,
+      });
+    }
+
+    const page = metadata?.page || 1;
+
+    const [ toonType, id ] = ID.split("-");
+
+    const url = (await this.getBaseURL())
+      .addPath("webtoon")
+      .addParam("toon", toonType)
+      .addParam("sod", "desc");
+
+    if (id != "new") url.addParam("sst", id);
+    if (page > 1) url.addPath(`p${page}`);
+
+    const req = createRequestObject({
+      url: url.build(),
+      method: "GET",
+    });
+
+    const data = await this.requestManager.schedule(req, 2);
+    const cheerio = this.cheerio.load(data.data);
+
+    const [ results, end ] = parseSearchResults(cheerio, this.NEWTOKI_URL);
+
+    return createPagedResults({
+      results,
+      metadata: {
+        page: page + 1,
+        end,
+      },
+    });
+  }
 }
 
+class NewTokiInterceptor implements RequestInterceptor {
+  // constructor(
+  //   private requestManager: () => RequestManager,
+  // ) {}
+
+  async interceptRequest(req: Request): Promise<Request> {
+    return req;
+  }
+
+  async interceptResponse(res: Response): Promise<Response> {
+    // FIXME: Figure out why this isn't working.
+
+    // If .jpg returns 404, try .jpeg.
+    // const url = res.request.url;
+
+    // if (url.includes("jpg") && res.status == 404) {
+    //   const req = res.request;
+    //   req.url = url.replaceAll("jpg", "jpeg");
+
+    //   res = await this.requestManager().schedule(req, 2);
+    // }
+
+    return res;
+  }
+}

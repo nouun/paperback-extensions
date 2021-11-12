@@ -32,10 +32,10 @@ export class URLBuilder {
     return this;
   }
 
-  addParam(key: string, value: ToString): URLBuilder {
+  addParam(key: string, value: ToString | undefined): URLBuilder {
     this.params.push({
       key,
-      value: value.toString(),
+      value: value ? value.toString() : "",
     });
     return this;
   }
