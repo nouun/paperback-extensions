@@ -33,6 +33,7 @@ module.exports = {
 
     // Formatting
     "@typescript-eslint/indent": [ "error", 2 ],
+    "@typescript-eslint/ban-ts-comment": "off",
     "modules-newline/import-declaration-newline": "error",
     "modules-newline/export-declaration-newline": "error",
     "array-bracket-newline": [ ERR, { "multiline": true } ],

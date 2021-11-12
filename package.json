@@ -5,13 +5,14 @@
   "version": "0.1.0",
   "description": "Nouun's Paperback extension repository",
   "main": "index.js",
+  "rootDir": "./src/",
   "scripts": {
     "bundle": "paperback bundle",
-    "serve": "paperback serve",
+    "serve": "rm -rf ./bundles/ && paperback serve",
     "test": "ts-mocha -p ./tsconfig.json ./src/**/*.spec.ts",
     "lint": "eslint_d ./src/**/*.ts",
     "fix": "eslint_d ./src/**/*.ts --fix",
-    "watch": "find './src/' -type f | entr -r sh -c 'rm -rf ./bundles/ && npm run serve'"
+    "watch": "find './src/' -type f | entr -r npm run serve"
   },
   "repository": {
     "type": "git",
