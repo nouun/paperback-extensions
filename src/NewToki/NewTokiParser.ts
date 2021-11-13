@@ -13,6 +13,19 @@ import {
 } from "./GeneralHelper";
 import { CheerioAPI } from "cheerio";
 
+const parseTime = (timeString: string): Date => {
+  if (timeString.includes(":")) {
+    const [ year, month, day ] = new Date()
+      .toLocaleDateString("en-US", { timeZone: "Asia/Seoul" })
+      .split("/")
+      .map((part) => part.padStart(2));
+
+    return new Date([ month, day, year ].join("-") + "T" + timeString + ":00+09:00");
+  } else {
+    return new Date(timeString.replace(/\./g, "-") + "T00:00:00+09:00");
+  }
+};
+
 export const parseSearchResults = ($: CheerioAPI, baseDomain: string): [MangaTile[], boolean] => {
   const results = $("#webtoon-list-all > li > div > div > .imgframe")
     .toArray()
@@ -114,8 +127,9 @@ export const parseChapters = ($: CheerioAPI, mangaId: string): Chapter[] => {
     const chapNum = parseFloat($(".wr-num", chapter).text()) || 1;
     const timeStr = $(".wr-date", chapter)
       .text()
-      .replaceAll(".", "-");
-    const time = new Date(timeStr);
+      .trim();
+
+    const time = parseTime(timeStr);
 
     return createChapter({
       id,
@@ -156,8 +170,10 @@ export const parseChapterDetails =
 
       const $ = cheerio.load(out);
 
-      pages = $("img")
+      pages = $("div")
         .toArray()
+        .map((div) => $("img", div).toArray())
+        .reduce((img1, img2) => img1.length > img2.length ? img1 : img2)
         .map((page) => $(page).get(0).attribs)
         .map((attribs) => attribs[
           Object.keys(attribs).filter((attrib) => attrib.startsWith("data-"))[0] ?? "data"
