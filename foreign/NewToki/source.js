@@ -694,6 +694,18 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.parseChapterDetails = exports.parseChapters = exports.parseMangaDetails = exports.parseSearchTags = exports.parseSearchResults = void 0;
 const paperback_extensions_common_1 = require("paperback-extensions-common");
 const GeneralHelper_1 = require("./GeneralHelper");
+const parseTime = (timeString) => {
+    if (timeString.includes(":")) {
+        const [year, month, day] = new Date()
+            .toLocaleDateString("en-US", { timeZone: "Asia/Seoul" })
+            .split("/")
+            .map((part) => part.padStart(2));
+        return new Date([month, day, year].join("-") + "T" + timeString + ":00+09:00");
+    }
+    else {
+        return new Date(timeString.replace(/\./g, "-") + "T00:00:00+09:00");
+    }
+};
 const parseSearchResults = ($, baseDomain) => {
     const results = $("#webtoon-list-all > li > div > div > .imgframe")
         .toArray()
@@ -787,8 +799,8 @@ const parseChapters = ($, mangaId) => {
         const chapNum = parseFloat($(".wr-num", chapter).text()) || 1;
         const timeStr = $(".wr-date", chapter)
             .text()
-            .replaceAll(".", "-");
-        const time = new Date(timeStr);
+            .trim();
+        const time = parseTime(timeStr);
         return createChapter({
             id,
             mangaId,
@@ -825,8 +837,10 @@ const parseChapterDetails = (data, cheerio, mangaId, id) => {
         const out = eval("var l;" + script + `${funcName}(htmlData)`);
         console.log("Output: " + out);
         const $ = cheerio.load(out);
-        pages = $("img")
+        pages = $("div")
             .toArray()
+            .map((div) => $("img", div).toArray())
+            .reduce((img1, img2) => img1.length > img2.length ? img1 : img2)
             .map((page) => $(page).get(0).attribs)
             .map((attribs) => {
             var _a;
