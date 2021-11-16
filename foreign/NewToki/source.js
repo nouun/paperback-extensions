@@ -837,10 +837,8 @@ const parseChapterDetails = (data, cheerio, mangaId, id) => {
         const out = eval("var l;" + script + `${funcName}(htmlData)`);
         console.log("Output: " + out);
         const $ = cheerio.load(out);
-        pages = $("div")
+        pages = $("div > img")
             .toArray()
-            .map((div) => $("img", div).toArray())
-            .reduce((img1, img2) => img1.length > img2.length ? img1 : img2)
             .map((page) => $(page).get(0).attribs)
             .map((attribs) => {
             var _a;
