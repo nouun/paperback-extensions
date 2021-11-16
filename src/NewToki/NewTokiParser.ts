@@ -170,10 +170,8 @@ export const parseChapterDetails =
 
       const $ = cheerio.load(out);
 
-      pages = $("div")
+      pages = $("div > img")
         .toArray()
-        .map((div) => $("img", div).toArray())
-        .reduce((img1, img2) => img1.length > img2.length ? img1 : img2)
         .map((page) => $(page).get(0).attribs)
         .map((attribs) => attribs[
           Object.keys(attribs).filter((attrib) => attrib.startsWith("data-"))[0] ?? "data"
