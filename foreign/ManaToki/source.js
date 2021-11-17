@@ -443,7 +443,7 @@ const TokiParser_1 = require("./TokiParser");
 const GeneralHelper_1 = require("./GeneralHelper");
 exports.DEFAULT_URL = "https://manatoki111.net";
 exports.ManaTokiInfo = {
-    name: "마나토끼",
+    name: "ManaToki (마나토끼)",
     icon: "icon.png",
     websiteBaseURL: exports.DEFAULT_URL,
     version: "0.1.0",
@@ -452,6 +452,12 @@ exports.ManaTokiInfo = {
     authorWebsite: "https://github.com/nouun/",
     contentRating: paperback_extensions_common_1.ContentRating.ADULT,
     language: paperback_extensions_common_1.LanguageCode.KOREAN,
+    sourceTags: [
+        {
+            text: "Korean (한국어)",
+            type: paperback_extensions_common_1.TagType.GREY,
+        }
+    ],
 };
 class ManaToki extends paperback_extensions_common_1.Source {
     constructor() {

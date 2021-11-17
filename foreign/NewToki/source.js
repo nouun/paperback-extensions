@@ -443,7 +443,7 @@ const NewTokiParser_1 = require("./NewTokiParser");
 const GeneralHelper_1 = require("./GeneralHelper");
 exports.DEFAULT_NEWTOKI_URL = "https://newtoki111.com";
 exports.NewTokiInfo = {
-    name: "뉴토끼",
+    name: "NewToki (뉴토끼)",
     icon: "icon.png",
     websiteBaseURL: exports.DEFAULT_NEWTOKI_URL,
     version: "0.1.0",
@@ -452,6 +452,12 @@ exports.NewTokiInfo = {
     authorWebsite: "https://github.com/nouun/",
     contentRating: paperback_extensions_common_1.ContentRating.ADULT,
     language: paperback_extensions_common_1.LanguageCode.KOREAN,
+    sourceTags: [
+        {
+            text: "Korean (한국어)",
+            type: paperback_extensions_common_1.TagType.GREY,
+        }
+    ],
 };
 class NewToki extends paperback_extensions_common_1.Source {
     constructor() {
