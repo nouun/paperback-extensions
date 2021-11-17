@@ -18,6 +18,7 @@ import {
   SourceInfo,
   Tag,
   TagSection,
+  TagType,
 } from "paperback-extensions-common";
 import {
   getStateData,
@@ -46,6 +47,12 @@ export const ManaTokiInfo: SourceInfo = {
   authorWebsite: "https://github.com/nouun/",
   contentRating: ContentRating.ADULT,
   language: LanguageCode.KOREAN,
+  sourceTags: [
+    {
+      text: "Korean (한국어)",
+      type: TagType.GREY,
+    }
+  ],
 };
 
 export class ManaToki extends Source {
