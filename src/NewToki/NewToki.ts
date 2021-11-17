@@ -35,7 +35,7 @@ import { URLBuilder } from "./GeneralHelper";
 export const DEFAULT_NEWTOKI_URL = "https://newtoki111.com";
 
 export const NewTokiInfo: SourceInfo = {
-  name: "뉴토끼",
+  name: "NewToki (뉴토끼)",
   icon: "icon.png",
   websiteBaseURL: DEFAULT_NEWTOKI_URL,
   version: "0.1.0",

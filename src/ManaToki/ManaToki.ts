@@ -37,7 +37,7 @@ import { URLBuilder } from "./GeneralHelper";
 export const DEFAULT_URL = "https://manatoki111.net";
 
 export const ManaTokiInfo: SourceInfo = {
-  name: "마나토끼",
+  name: "ManaToki (마나토끼)",
   icon: "icon.png",
   websiteBaseURL: DEFAULT_URL,
   version: "0.1.0",
