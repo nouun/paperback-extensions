@@ -15,12 +15,12 @@ import { CheerioAPI } from "cheerio";
 
 const parseTime = (timeString: string): Date => {
   if (timeString.includes(":")) {
-    const [ year, month, day ] = new Date()
+    const [ month, day, year ] = new Date()
       .toLocaleDateString("en-US", { timeZone: "Asia/Seoul" })
       .split("/")
       .map((part) => part.padStart(2));
 
-    return new Date([ month, day, year ].join("-") + "T" + timeString + ":00+09:00");
+    return new Date([ year, month, day ].join("-") + "T" + timeString + ":00+09:00");
   } else {
     return new Date(timeString.replace(/\./g, "-") + "T00:00:00+09:00");
   }
