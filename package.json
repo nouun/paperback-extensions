@@ -46,6 +46,6 @@
   },
   "dependencies": {
     "paperback-cli": "^1.4.0",
-    "paperback-extensions-common": "^4.2.0"
+    "paperback-extensions-common": "^4.3.5"
   }
 }
