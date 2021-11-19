@@ -57,7 +57,7 @@ export class NewToki extends Source {
   NEWTOKI_URL = DEFAULT_NEWTOKI_URL;
 
   requestManager = createRequestManager({
-    requestsPerSecond: 4,
+    requestsPerSecond: 0.5,
     requestTimeout: 10000,
     interceptor: new NewTokiInterceptor(() => this.requestManager),
   });

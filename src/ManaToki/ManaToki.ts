@@ -59,7 +59,7 @@ export class ManaToki extends Source {
   URL = DEFAULT_URL;
 
   requestManager = createRequestManager({
-    requestsPerSecond: 4,
+    requestsPerSecond: 0.5,
     requestTimeout: 10000,
     interceptor: new NewTokiInterceptor(() => this.requestManager),
   });
