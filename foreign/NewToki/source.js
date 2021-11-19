@@ -464,7 +464,7 @@ class NewToki extends paperback_extensions_common_1.Source {
         super(...arguments);
         this.NEWTOKI_URL = exports.DEFAULT_NEWTOKI_URL;
         this.requestManager = createRequestManager({
-            requestsPerSecond: 4,
+            requestsPerSecond: 0.5,
             requestTimeout: 10000,
             interceptor: new NewTokiInterceptor(() => this.requestManager),
         });

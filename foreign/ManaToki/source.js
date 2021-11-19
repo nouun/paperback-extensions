@@ -464,7 +464,7 @@ class ManaToki extends paperback_extensions_common_1.Source {
         super(...arguments);
         this.URL = exports.DEFAULT_URL;
         this.requestManager = createRequestManager({
-            requestsPerSecond: 4,
+            requestsPerSecond: 0.5,
             requestTimeout: 10000,
             interceptor: new NewTokiInterceptor(() => this.requestManager),
         });
