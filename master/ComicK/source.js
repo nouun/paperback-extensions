@@ -391,6 +391,7 @@ exports.ComicK = exports.ComicKInfo = void 0;
 const paperback_extensions_common_1 = require("paperback-extensions-common");
 const ComicKSettings_1 = require("./ComicKSettings");
 const ComicKParser_1 = require("./ComicKParser");
+const ComicKHelper_1 = require("./ComicKHelper");
 const BASE_URL = "https://comick.fun";
 const API_BASE_URL = "https://api.comick.fun";
 exports.ComicKInfo = {
@@ -433,7 +434,6 @@ class ComicK extends paperback_extensions_common_1.Source {
         var _a, _b;
         return __awaiter(this, void 0, void 0, function* () {
             const page = (metadata === null || metadata === void 0 ? void 0 : metadata.page) || 1;
-            console.log(metadata);
             const title = (query.title || "").toString();
             const q = encodeURIComponent(title);
             const inclTags = (_a = query.includedTags) === null || _a === void 0 ? void 0 : _a.map((tag) => tag.id).join(",");
@@ -463,9 +463,33 @@ class ComicK extends paperback_extensions_common_1.Source {
                 url: `${API_BASE_URL}/comic/${_res.id}/chapter?tachiyomi=true`,
                 method: "GET",
             });
-            const data = yield this.requestManager.schedule(req, 2);
+            const res = yield this.requestManager.schedule(req, 2);
+            const data = JSON.parse(res.data);
+            let allChapters = (0, ComicKParser_1.parseChapters)(mangaId, data.chapters);
+            const pages = Math.ceil((data.total - 50) / 50);
+            console.log(pages);
+            if (pages > 0) {
+                const reqs = [...Array(pages).keys()]
+                    .map((page) => __awaiter(this, void 0, void 0, function* () {
+                    const req = createRequestObject({
+                        url: `${API_BASE_URL}/comic/${_res.id}/chapter?tachiyomi=true&page=${page + 1}`,
+                        method: "GET",
+                    });
+                    const res = yield this.requestManager.schedule(req, 2);
+                    const data = JSON.parse(res.data);
+                    if ((data === null || data === void 0 ? void 0 : data.chapters.length) == 0) {
+                        return;
+                    }
+                    const chapters = (0, ComicKParser_1.parseChapters)(mangaId, data.chapters);
+                    allChapters = allChapters.concat(chapters);
+                }));
+                yield Promise.all(reqs);
+            }
+            console.log(allChapters.length);
+            console.log(data.total);
             const stateData = yield (0, ComicKSettings_1.getStateData)(this.stateManager);
-            return (0, ComicKParser_1.parseChapters)(mangaId, data.data, stateData);
+            return allChapters
+                .filter((c) => stateData.filter.languages.includes(ComicKHelper_1.CKLanguages.getCKCode(c.langCode)));
         });
     }
     getChapterDetails(mangaId, id) {
@@ -569,7 +593,7 @@ class ComicK extends paperback_extensions_common_1.Source {
 }
 exports.ComicK = ComicK;
 
-},{"./ComicKParser":50,"./ComicKSettings":51,"paperback-extensions-common":5}],49:[function(require,module,exports){
+},{"./ComicKHelper":49,"./ComicKParser":50,"./ComicKSettings":51,"paperback-extensions-common":5}],49:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CKLanguages = void 0;
@@ -820,16 +844,21 @@ class _CKLanguages {
                 pbCode: "hk",
             },
         ];
-        this.getCKCodeList = () => this.Languages.map((Language) => Language.ckCode);
+        this.getCKCodeList = () => this.Languages.map((lang) => lang.ckCode);
         this.getName = (ckCode) => {
             var _a, _b;
             return (_b = (_a = this.Languages
-                .filter((Language) => Language.ckCode == ckCode)[0]) === null || _a === void 0 ? void 0 : _a.name) !== null && _b !== void 0 ? _b : "Unknown";
+                .filter((lang) => lang.ckCode == ckCode)[0]) === null || _a === void 0 ? void 0 : _a.name) !== null && _b !== void 0 ? _b : "Unknown";
+        };
+        this.getCKCode = (pbCode) => {
+            var _a, _b;
+            return (_b = (_a = this.Languages
+                .filter((lang) => lang.pbCode == pbCode)[0]) === null || _a === void 0 ? void 0 : _a.ckCode) !== null && _b !== void 0 ? _b : "_unknown";
         };
         this.getPBCode = (ckCode) => {
             var _a, _b;
             return (_b = (_a = this.Languages
-                .filter((Language) => Language.ckCode == ckCode)[0]) === null || _a === void 0 ? void 0 : _a.pbCode) !== null && _b !== void 0 ? _b : "_unknown";
+                .filter((lang) => lang.ckCode == ckCode)[0]) === null || _a === void 0 ? void 0 : _a.pbCode) !== null && _b !== void 0 ? _b : "_unknown";
         };
         this.getDefault = () => this.Languages
             .filter((lang) => lang.default)
@@ -893,10 +922,7 @@ const parseMangaDetails = (mangaId, data) => {
     });
 };
 exports.parseMangaDetails = parseMangaDetails;
-const parseChapters = (mangaId, data, settings) => JSON.parse(data)
-    .chapters
-    .filter((c) => settings.filter.languages.includes(c.lang))
-    .map((c) => {
+const parseChapters = (mangaId, data) => data.map((c) => {
     const id = c.hid;
     const name = c.title || "Unknown";
     const volume = parseInt(c.vol || "") || 1;
