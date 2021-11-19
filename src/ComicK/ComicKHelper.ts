@@ -253,15 +253,19 @@ class _CKLanguages {
   ];
 
   getCKCodeList = (): string[] =>
-    this.Languages.map((Language) => Language.ckCode);
+    this.Languages.map((lang) => lang.ckCode);
 
   getName = (ckCode: string): string =>
     this.Languages
-      .filter((Language) => Language.ckCode == ckCode)[0]?.name ?? "Unknown";
+      .filter((lang) => lang.ckCode == ckCode)[0]?.name ?? "Unknown";
+
+  getCKCode = (pbCode: string): string =>
+    this.Languages
+      .filter((lang) => lang.pbCode == pbCode)[0]?.ckCode ?? "_unknown"
 
   getPBCode = (ckCode: string): string =>
     this.Languages
-      .filter((Language) => Language.ckCode == ckCode)[0]?.pbCode ?? "_unknown";
+      .filter((lang) => lang.ckCode == ckCode)[0]?.pbCode ?? "_unknown";
 
   getDefault = (): string[] =>
     this.Languages

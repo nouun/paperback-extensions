@@ -27,6 +27,7 @@ import {
   parseSearchItems,
   parseSearchTags,
 } from "./ComicKParser";
+import { CKLanguages } from "./ComicKHelper";
 
 const BASE_URL = "https://comick.fun";
 const API_BASE_URL = "https://api.comick.fun";
@@ -50,7 +51,7 @@ export class ComicK extends Source {
     return Promise.resolve(createSection({
       id: "main",
       header: "ComicK Settings",
-      rows: () => Promise.resolve([ menuGeneralSettings(this.stateManager) ]),
+      rows: () => Promise.resolve([menuGeneralSettings(this.stateManager)]),
     }));
   }
 
@@ -69,7 +70,6 @@ export class ComicK extends Source {
   // eslint-disable-next-line max-len
   async getSearchResults(query: SearchRequest, metadata: Metadata): Promise<PagedResults> {
     const page = metadata?.page || 1;
-    console.log(metadata);
     const title = (query.title || "").toString();
     const q = encodeURIComponent(title);
     const inclTags = query.includedTags?.map((tag: Tag) => tag.id).join(",");
@@ -102,11 +102,42 @@ export class ComicK extends Source {
       url: `${API_BASE_URL}/comic/${_res.id}/chapter?tachiyomi=true`,
       method: "GET",
     });
+    const res = await this.requestManager.schedule(req, 2);
+    const data = JSON.parse(res.data);
 
-    const data = await this.requestManager.schedule(req, 2);
+    let allChapters = parseChapters(mangaId, data.chapters);
+
+    const pages = Math.ceil((data.total - 50) / 50);
+    console.log(pages)
+    if (pages > 0) {
+      const reqs = [...Array(pages).keys()]
+        .map(async (page) => {
+          const req = createRequestObject({
+            url: `${API_BASE_URL}/comic/${_res.id}/chapter?tachiyomi=true&page=${page + 1}`,
+            method: "GET",
+          });
+
+          const res = await this.requestManager.schedule(req, 2);
+          const data = JSON.parse(res.data);
+
+          if (data?.chapters.length == 0) {
+            return;
+          }
+
+          const chapters = parseChapters(mangaId, data.chapters);
+          allChapters = allChapters.concat(chapters);
+        });
+
+      await Promise.all(reqs);
+    }
+
+    console.log(allChapters.length);
+    console.log(data.total);
 
     const stateData = await getStateData(this.stateManager);
-    return parseChapters(mangaId, data.data, stateData);
+    return allChapters
+      .filter((c: Chapter) =>
+        stateData.filter.languages.includes(CKLanguages.getCKCode(c.langCode)))
   }
 
   async getChapterDetails(mangaId: string, id: string): Promise<ChapterDetails> {

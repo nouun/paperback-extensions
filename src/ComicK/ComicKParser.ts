@@ -69,13 +69,8 @@ export const parseMangaDetails = (mangaId: string, data: string): Manga => {
 };
 
 export const parseChapters =
-  (mangaId: string, data: string, settings: StateData): Chapter[] =>
-    JSON.parse(data)
-      .chapters
-      .filter((c: CKChapterPreview) =>
-        settings.filter.languages.includes(c.lang))
-      .map((c: CKChapterPreview): Chapter => {
-
+  (mangaId: string, data: CKChapterPreview[]): Chapter[] =>
+      data.map((c: CKChapterPreview): Chapter => {
         const id = c.hid;
         const name = c.title || "Unknown";
         const volume = parseInt(c.vol || "") || 1;

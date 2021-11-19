@@ -38,29 +38,6 @@ describe("ComicK.Fun Tests", function() {
     }
   });
 
-  //   it("Search Manga Genre", async () => {
-  //     const testSearch: SearchRequest = {
-  //       includedTags: [{
-  //         id: "19",
-  //         label: "Romance"
-  //       }]
-  //     };
-
-  //     const search = await wrapper.searchRequest(source, testSearch);
-
-  //     for (const result of search.results) {
-  //       chai.expect(result, "No response from server").to.exist;
-
-  //       const res = <MangaTile> result;
-  //       chai.expect(res.id, "No ID found for search query").to.be.not.empty;
-  //       chai.expect(res.image, "No image found for search").to.be.not.empty;
-  //       chai.expect(res.title, "No title").to.be.not.null;
-  //       chai.expect(res.subtitleText, "No subtitle text").to.be.not.null;
-  //       chai.expect(res.primaryText, "No primary text").to.be.not.null;
-  //       chai.expect(res.secondaryText, "No secondary text").to.be.not.null;
-  //     }
-  //   });
-
   it("Retrieve Manga Details", async () => {
     const data = <Manga & { id: number }>await wrapper.getMangaDetails(source, mangaId);
 
