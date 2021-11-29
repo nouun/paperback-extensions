@@ -189,30 +189,6 @@ export const parseChapterDetails =
     });
   };
 
-export const parseHomeUpdates = ($: CheerioAPI, collectedIds?: string[]): { manga: MangaTile[], collectedIds: string[] } => {
-  const mangaTiles: MangaTile[] = []
-  if (!collectedIds) {
-    collectedIds = []
-  }
-
-  for (const item of $('.post-row', '.miso-post-webzine').toArray()) {
-    const id = $('a', $('.pull-right.post-info', item)).attr('href')?.split('/').pop() ?? ''
-    const title = $('a', $('.post-subject', item)).children().remove().end().text().trim()
-    const image = $('img', item).attr('src') ?? ''
-
-    if (!collectedIds.includes(id)) {
-      mangaTiles.push(createMangaTile({
-        id: id,
-        title: createIconText({ text: title }),
-        image: image
-      }))
-      collectedIds.push(id)
-    }
-  }
-
-  return { manga: mangaTiles, collectedIds: collectedIds }
-}
-
 export const parseHomeList = ($: CheerioAPI, collectedIds?: string[]): { manga: MangaTile[], collectedIds: string[] } => {
   const mangaTiles: MangaTile[] = []
   if (!collectedIds) {
