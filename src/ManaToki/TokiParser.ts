@@ -26,6 +26,13 @@ const parseTime = (timeString: string): Date => {
   }
 };
 
+const parseChapterNumber = (chapterName: string): number => {
+  // Actual chapter number is on each chapter name.
+  // For example, "MangaName 1-2" is chapter 1-2, "MangaName 2.5화" is chapter 2.5, etc.
+  const ch = /([0-9]+)(?:[-.]([0-9]+))?(?:화)/.exec(chapterName) || [ '', '1', '0' ];
+  return Number(`${ch[1]}.${ch[2] ?? "0"}`)
+};
+
 export const parseSearchResults = ($: CheerioAPI, baseDomain: string): [MangaTile[], boolean] => {
   const results = $("#webtoon-list-all > li > div > div > .imgframe")
     .toArray()
@@ -124,7 +131,7 @@ export const parseChapters = ($: CheerioAPI, mangaId: string): Chapter[] => {
       })
       .text()
       .trim();
-    const chapNum = parseFloat($(".wr-num", chapter).text()) || 1;
+    const chapNum = parseChapterNumber(name); // parseFloat($(".wr-num", chapter).text()) || 1;
     const timeStr = $(".wr-date", chapter)
       .text()
       .trim();
@@ -188,30 +195,6 @@ export const parseChapterDetails =
       longStrip: false,
     });
   };
-
-export const parseHomeUpdates = ($: CheerioAPI, collectedIds?: string[]): { manga: MangaTile[], collectedIds: string[] } => {
-  const mangaTiles: MangaTile[] = []
-  if (!collectedIds) {
-    collectedIds = []
-  }
-
-  for (const item of $('.post-row', '.miso-post-webzine').toArray()) {
-    const id = $('a', $('.pull-right.post-info', item)).attr('href')?.split('/').pop() ?? ''
-    const title = $('a', $('.post-subject', item)).children().remove().end().text().trim()
-    const image = $('img', item).attr('src') ?? ''
-
-    if (!collectedIds.includes(id)) {
-      mangaTiles.push(createMangaTile({
-        id: id,
-        title: createIconText({ text: title }),
-        image: image
-      }))
-      collectedIds.push(id)
-    }
-  }
-
-  return { manga: mangaTiles, collectedIds: collectedIds }
-}
 
 export const parseHomeList = ($: CheerioAPI, collectedIds?: string[]): { manga: MangaTile[], collectedIds: string[] } => {
   const mangaTiles: MangaTile[] = []

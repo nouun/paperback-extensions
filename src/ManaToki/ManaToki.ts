@@ -28,7 +28,6 @@ import {
   parseChapterDetails,
   parseChapters,
   parseHomeList,
-  parseHomeUpdates,
   parseMangaDetails,
   parseSearchResults,
   parseSearchTags,
@@ -182,15 +181,15 @@ export class ManaToki extends Source {
       {
         request: createRequestObject({
           url: (await this.getBaseURL())
-            .addPath("bbs")
-            .addPath("page.php")
-            .addParam("hid", "update")
+            .addPath("comic")
+            .addParam("sst", "as_update")
+            .addParam("sod", "desc")
             .build(),
           method: 'GET'
         }),
         section: createHomeSection({
           id: 'updates',
-          title: '최신화',
+          title: '업데이트',
           view_more: true,
         }),
       },
@@ -217,14 +216,7 @@ export class ManaToki extends Source {
       promises.push(
         this.requestManager.schedule(section.request, 3).then(response => {
           const $ = this.cheerio.load(response.data)
-          switch (section.section.id) {
-            case 'updates':
-              section.section.items = parseHomeUpdates($).manga
-              break
-            case 'list':
-              section.section.items = parseHomeList($).manga
-              break
-          }
+          section.section.items = parseHomeList($).manga
           sectionCallback(section.section)
         }),
       )
@@ -239,58 +231,28 @@ export class ManaToki extends Source {
     let manga
     let mData = undefined
 
-    switch (homepageSectionId) {
+    let requestUrl = (await this.getBaseURL())
+      .addPath("comic")
+      .addPath(`p${page}`)
+    
+    if (homepageSectionId === 'updates')
+      requestUrl = requestUrl.addParam("sst", "as_update").addParam("sod", "desc")
 
-      case 'updates': {
-        const request = createRequestObject({
-          url: (await this.getBaseURL())
-            .addPath("bbs")
-            .addPath("page.php")
-            .addParam("hid", "update")
-            .addParam("page", page)
-            .build(),
-          method: 'GET'
-        })
+    const request = createRequestObject({
+      url: requestUrl.build(),
+      method: 'GET'
+    })
 
-        const data = await this.requestManager.schedule(request, 3)
-        const $ = this.cheerio.load(data.data)
+    const data = await this.requestManager.schedule(request, 3)
+    const $ = this.cheerio.load(data.data)
 
-        const parsedData = parseHomeUpdates($, collectedIds)
-        manga = parsedData.manga
-        collectedIds = parsedData.collectedIds
+    const parsedData = parseHomeList($, collectedIds)
+    manga = parsedData.manga
+    collectedIds = parsedData.collectedIds
 
-        if (page <= 9)
-          mData = { page: (page + 1), collectedIds: collectedIds }
+    if (page <= 9)
+      mData = { page: (page + 1), collectedIds: collectedIds }
 
-        break
-      }
-      case 'list': {
-        const request = createRequestObject({
-          url: (await this.getBaseURL())
-            .addPath("comic")
-            .addPath(`p${page}`)
-            .build(),
-          method: 'GET'
-        })
-
-        const data = await this.requestManager.schedule(request, 3)
-        const $ = this.cheerio.load(data.data)
-
-        const parsedData = parseHomeList($, collectedIds)
-        manga = parsedData.manga
-        collectedIds = parsedData.collectedIds
-
-        if (page <= 9)
-          mData = { page: (page + 1), collectedIds: collectedIds }
-
-        break
-      }
-      default:
-        return createPagedResults({
-          results: [],
-          metadata: mData
-        })
-    }
 
     return createPagedResults({
       results: manga,
