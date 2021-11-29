@@ -26,6 +26,13 @@ const parseTime = (timeString: string): Date => {
   }
 };
 
+const parseChapterNumber = (chapterName: string): number => {
+  // Actual chapter number is on each chapter name.
+  // For example, "MangaName 1-2" is chapter 1-2, "MangaName 2.5화" is chapter 2.5, etc.
+  const ch = /([0-9]+)(?:[-.]([0-9]+))?(?:화)/.exec(chapterName) || [ '', '1', '0' ];
+  return Number(`${ch[1]}.${ch[2] ?? "0"}`)
+};
+
 export const parseSearchResults = ($: CheerioAPI, baseDomain: string): [MangaTile[], boolean] => {
   const results = $("#webtoon-list-all > li > div > div > .imgframe")
     .toArray()
@@ -124,7 +131,7 @@ export const parseChapters = ($: CheerioAPI, mangaId: string): Chapter[] => {
       })
       .text()
       .trim();
-    const chapNum = parseFloat($(".wr-num", chapter).text()) || 1;
+    const chapNum = parseChapterNumber(name); // parseFloat($(".wr-num", chapter).text()) || 1;
     const timeStr = $(".wr-date", chapter)
       .text()
       .trim();
