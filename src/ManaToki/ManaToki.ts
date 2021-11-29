@@ -189,7 +189,7 @@ export class ManaToki extends Source {
         }),
         section: createHomeSection({
           id: 'updates',
-          title: '최신',
+          title: '업데이트',
           view_more: true,
         }),
       },
@@ -231,15 +231,15 @@ export class ManaToki extends Source {
     let manga
     let mData = undefined
 
-    let target_url = (await this.getBaseURL())
+    let requestUrl = (await this.getBaseURL())
       .addPath("comic")
       .addPath(`p${page}`)
     
     if (homepageSectionId === 'updates')
-      target_url = target_url.addParam("sst", "as_update").addParam("sod", "desc")
+      requestUrl = requestUrl.addParam("sst", "as_update").addParam("sod", "desc")
 
     const request = createRequestObject({
-      url: target_url.build(),
+      url: requestUrl.build(),
       method: 'GET'
     })
 
